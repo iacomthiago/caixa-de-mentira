@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caixa de Mentira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d14; --bg2:#121521; --panel:#161a29; --panel2:#1c2134; --line:#272d45;
+  --text:#e8ebf5; --muted:#8a92ad; --good:#3ddc84; --bad:#ff5a6a; --gold:#ffd36b;
+  --accent:#7c8cff;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+body{min-height:100vh;background:
+  radial-gradient(1200px 600px at 50% -200px, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+  var(--bg)}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding-block:0 60px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.noimg{display:grid;place-items:center;font-family:Rajdhani,"Arial Narrow",sans-serif;font-weight:700;color:rgb(var(--r));text-shadow:0 0 18px rgba(var(--r),.55);text-align:center;line-height:1.05;letter-spacing:.4px;font-size:22px;background:repeating-linear-gradient(135deg,rgba(var(--r),.07) 0 8px,transparent 8px 16px);border-radius:8px}
+.noimg-mode .tile .w{display:none}
+.reels.multi .noimg{font-size:17px}
+.res .noimg{font-size:15px}
+.hist .noimg{width:90%;height:80%;font-size:12px}
+@media (prefers-reduced-motion: reduce){.crate.shake{animation:none}.res{animation:none}.flash.go{animation:none}}
+header{display:flex;align-items:center;gap:14px;padding:18px 0 10px;flex-wrap:wrap}
+.logo{font-family:Rajdhani,"Arial Narrow",sans-serif;font-weight:700;font-size:26px;letter-spacing:.5px;cursor:pointer;user-select:none}
+.logo b{color:var(--accent)}
+.free{font-size:12px;font-weight:600;color:#0b0d14;background:var(--good);padding:3px 8px;border-radius:99px}
+.spacer{flex:1}
+.wallet{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;color:var(--muted)}
+.chip b{color:var(--text);font-weight:700}
+.chip b.neg{color:var(--bad)} .chip b.pos{color:var(--good)}
+.iconbtn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:7px 10px;font-size:13px}
+.iconbtn.on{border-color:var(--accent);color:var(--accent)}
+
+.banner{background:linear-gradient(90deg,#1a1f33,#151827);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:8px 0 22px;font-size:14px;color:var(--muted);line-height:1.5}
+.banner b{color:var(--text)}
+
+h2{font-family:Rajdhani,"Arial Narrow",sans-serif;font-weight:700;font-size:22px;margin:26px 0 12px;letter-spacing:.3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.casecard{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;cursor:pointer;overflow:hidden;transition:transform .15s,border-color .15s}
+.casecard:hover{transform:translateY(-3px);border-color:var(--c)}
+.casecard::before{content:"";position:absolute;inset:0;background:radial-gradient(280px 180px at 50% 30%, color-mix(in srgb,var(--c) 30%,transparent),transparent 70%);pointer-events:none}
+.casecard .nm{font-family:Rajdhani,"Arial Narrow",sans-serif;font-weight:700;font-size:22px;text-align:center;margin-top:8px;position:relative}
+.casecard .pr{text-align:center;color:var(--muted);font-size:14px;position:relative}
+.casecard .facts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;position:relative}
+.fact{background:var(--bg2);border-radius:10px;padding:7px 9px;font-size:11px;color:var(--muted)}
+.fact b{display:block;font-size:14px;color:var(--text);margin-top:1px}
+.fact b.bad{color:var(--bad)}
+
+/* the crate art */
+.crate{--s:120px;width:var(--s);height:calc(var(--s)*.78);margin:6px auto 0;position:relative;transform:perspective(500px) rotateX(8deg)}
+.crate .body{position:absolute;inset:18% 0 0 0;border-radius:12px;background:linear-gradient(160deg,var(--c),var(--d));box-shadow:0 14px 30px -8px color-mix(in srgb,var(--c) 60%,transparent), inset 0 2px 0 rgba(255,255,255,.25), inset 0 -10px 18px rgba(0,0,0,.35)}
+.crate .lid{position:absolute;left:-4%;right:-4%;top:0;height:30%;border-radius:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 85%,white),var(--c));box-shadow:inset 0 -4px 0 rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.3)}
+.crate .band{position:absolute;left:44%;width:12%;top:0;bottom:0;background:rgba(0,0,0,.22)}
+.crate .glyph{position:absolute;inset:30% 0 0 0;display:grid;place-items:center;font-size:calc(var(--s)*.3);color:rgba(255,255,255,.92);text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.crate.shake{animation:shake .5s ease-in-out infinite}
+@keyframes shake{0%,100%{transform:perspective(500px) rotateX(8deg) rotate(0)}25%{transform:perspective(500px) rotateX(8deg) rotate(-3deg)}75%{transform:perspective(500px) rotateX(8deg) rotate(3deg)}}
+
+/* case page */
+.back{background:none;border:none;color:var(--muted);font-size:14px;padding:0;margin-top:6px}
+.back:hover{color:var(--text)}
+.casehead{display:flex;align-items:center;gap:18px;margin:8px 0 14px;flex-wrap:wrap}
+.casehead .crate{--s:90px;margin:0}
+.casehead h1{font-family:Rajdhani,"Arial Narrow",sans-serif;font-size:32px;margin:0;line-height:1}
+.casehead .sub{color:var(--muted);font-size:14px;margin-top:4px}
+
+.reels{display:flex;flex-direction:column;gap:10px}
+.reel{position:relative;height:178px;background:linear-gradient(180deg,#0f1220,#141829);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.reels.multi .reel{height:112px}
+.reel::before,.reel::after{content:"";position:absolute;top:0;bottom:0;width:120px;z-index:2;pointer-events:none}
+.reel::before{left:0;background:linear-gradient(90deg,#0d0f1a,transparent)}
+.reel::after{right:0;background:linear-gradient(-90deg,#0d0f1a,transparent)}
+.marker{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--gold);z-index:3;box-shadow:0 0 12px var(--gold)}
+.marker::before,.marker::after{content:"";position:absolute;left:-7px;border:8px solid transparent}
+.marker::before{top:0;border-top-color:var(--gold)}
+.marker::after{bottom:0;border-bottom-color:var(--gold)}
+.strip{position:absolute;top:12px;bottom:12px;left:0;display:flex;gap:6px;will-change:transform}
+.reels.multi .strip{top:8px;bottom:8px}
+.tile{flex:0 0 150px;height:100%;border-radius:12px;background:linear-gradient(180deg,#1b2033,#151a2a);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px}
+.reels.multi .tile{flex-basis:118px}
+.reels.multi .tile img{height:70%}
+.tile::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:rgb(var(--r))}
+.tile::before{content:"";position:absolute;inset:0;background:radial-gradient(90px 60px at 50% 70%, rgba(var(--r),.28), transparent 70%)}
+.tile img{position:relative;width:88%;height:62%;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
+.tile .w{position:relative;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tile .s{position:relative;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.reels.multi .tile .w{display:none}
+.tile.win{outline:2px solid rgb(var(--r));box-shadow:0 0 24px rgba(var(--r),.6)}
+.tile .noimg{position:relative;width:88%;height:62%}
+
+.controls{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:16px 0 6px}
+.qty{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.qty button{background:none;border:none;color:var(--muted);padding:10px 14px;font-weight:600}
+.qty button.on{background:var(--panel2);color:var(--text)}
+.open{background:linear-gradient(180deg,color-mix(in srgb,var(--c) 90%,white),var(--c));color:#10121b;border:none;border-radius:12px;padding:12px 26px;font-weight:700;font-size:16px;box-shadow:0 8px 24px -6px var(--c)}
+.open:disabled{filter:grayscale(.7) brightness(.7);cursor:default}
+.ghost{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-weight:600;font-size:14px}
+.hint{text-align:center;color:var(--muted);font-size:12px}
+
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
+.res{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:10px;align-items:center;animation:pop .35s ease-out;position:relative;overflow:hidden}
+.res::before{content:"";position:absolute;inset:0;background:radial-gradient(160px 100px at 20% 50%,rgba(var(--r),.22),transparent 70%)}
+.res img,.res .noimg{width:74px;height:56px;object-fit:contain;flex:none;position:relative}
+.res .t{position:relative;min-width:0}
+.res .n{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .m{font-size:12px;color:var(--muted)}
+.res .p{font-size:15px;font-weight:700;margin-top:3px}
+.res .d{font-size:12px;font-weight:600}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+
+.cols{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-top:8px}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.panel h3{margin:0 0 10px;font-family:Rajdhani,"Arial Narrow",sans-serif;font-size:19px}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px;color:var(--muted)}
+.kv:last-child{border-bottom:none}
+.kv b{color:var(--text)}
+.kv b.neg{color:var(--bad)} .kv b.pos{color:var(--good)}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.item{background:linear-gradient(180deg,#1b2033,#151a2a);border-radius:12px;padding:10px 8px 12px;position:relative;overflow:hidden;cursor:default}
+.item::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:rgb(var(--r))}
+.item::before{content:"";position:absolute;inset:0;background:radial-gradient(90px 60px at 50% 45%, rgba(var(--r),.22), transparent 70%)}
+.item img,.item .noimg{position:relative;width:100%;height:78px;object-fit:contain;display:block}
+.item .odds{position:absolute;top:6px;right:8px;font-size:11px;font-weight:700;color:var(--text);background:rgba(0,0,0,.45);padding:2px 6px;border-radius:6px;z-index:1}
+.item .n{position:relative;font-size:12px;font-weight:600;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .pr{position:relative;font-size:11px;color:var(--muted)}
+.item .tip{display:none;position:absolute;inset:0;background:rgba(10,12,20,.96);z-index:2;padding:8px;font-size:11px;overflow:auto}
+.item:hover .tip{display:block}
+.tip table{width:100%;border-collapse:collapse}
+.tip td{padding:2px 0}
+.tip td:last-child{text-align:right;color:var(--muted)}
+
+.history{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;min-height:58px}
+.hist{flex:0 0 70px;height:54px;border-radius:8px;background:#151a2a;position:relative;display:grid;place-items:center;border-bottom:3px solid rgb(var(--r))}
+.hist img{width:90%;height:80%;object-fit:contain}
+.empty{color:var(--muted);font-size:13px;padding:14px 0}
+
+canvas{width:100%;height:140px;display:block;background:var(--bg2);border-radius:10px}
+
+.modal{position:fixed;inset:0;background:rgba(5,6,10,.75);backdrop-filter:blur(4px);display:none;place-items:center;z-index:50;padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+.modal.show{display:grid}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:560px;width:100%;padding:20px;max-height:90vh;overflow:auto}
+.sheet h3{font-family:Rajdhani,"Arial Narrow",sans-serif;font-size:24px;margin:0 0 4px}
+.bigrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.big{background:var(--bg2);border-radius:12px;padding:10px 12px}
+.big span{font-size:12px;color:var(--muted)}
+.big b{display:block;font-size:20px;margin-top:2px}
+.bar{height:10px;border-radius:99px;background:var(--bad);overflow:hidden;margin:6px 0 4px}
+.bar i{display:block;height:100%;background:var(--good)}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0}
+.flash.go{animation:flash 1s ease-out}
+@keyframes flash{0%{opacity:.55}100%{opacity:0}}
+footer{margin-top:40px;color:var(--muted);font-size:12px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="wrap">
+  <header>
+    <div class="logo" id="home">CAIXA DE <b>MENTIRA</b></div>
+    <span class="free">100% grátis · nada vale nada</span>
+    <div class="spacer"></div>
+    <div class="wallet" id="wallet"></div>
+    <button class="iconbtn" id="sound" title="Som">🔊 Som</button>
+    <button class="iconbtn" id="fast" title="Animação rápida">⚡ Rápido</button>
+  </header>
+  <div id="view"></div>
+  <footer>Simulador sem dinheiro real. Chances e preços copiados das páginas das caixas em 06/11/2026 (100.000 tickets por caixa) — o site pode mudar isso a qualquer momento.<br>Os itens que você "ganha" aqui não existem. E os de lá, na média, também valem menos que você pagou.</footer>
+</div>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const CASES = [{"id":"lovely","name":"Lovely Case","price":18.0,"accent":"#ff4f9a","dark":"#7a1748","glyph":"♥","items":[{"n":"Bayonet | Slaughter","c":"235,75,75","i":"0308445d513c473a0e55ffb860941a62c354db31a9385760c6490890b3d62e55","v":[["FT",231499,10],["MW",202428,2]]},{"n":"M4A1-S | Cyrex","c":"235,75,75","i":"2bd64e947c56a78e7b2e3c4ce5d36daa855c0ed2832bfac2be1624220ace4514","v":[["FN",136782,2],["ST WW",122736,2],["FT",122016,2],["MW",121908,2],["ST MW",121596,2],["ST FT",119917,2],["WW",118446,2]]},{"n":"AK-47 | Neon Revolution","c":"235,75,75","i":"749a5eadfe3944cf19729343285c43a4a11be82ab2f81d0ba596df31631e3108","v":[["FN",167328,2],["ST MW",83400,2],["MW",81900,2],["WW",78156,2],["FT",76368,2],["ST FT",70536,2]]},{"n":"Glock-18 | Fully Tuned","c":"235,75,75","i":"738acd740196ad1205dc1971be99614099a8efa0d23603564dbe2c6e5ec6f2ae","v":[["FN",140526,2],["MW",71946,2],["FT",46206,2],["WW",35298,2]]},{"n":"Gut Knife | Slaughter","c":"235,75,75","i":"f0f853554f92f134940ea723b3f4ea1c4a13afcf96907e069de5510d00156bb0","v":[["MW",72588,2],["FT",70195,2]]},{"n":"P90 | Cold Blooded","c":"211,44,230","i":"70cb8838f9c9e7c5fce7799ef0b0af890981a2f8b29684640db0917d6e359b13","v":[["ST MW",63270,2],["ST FN",58866,2],["MW",41670,2],["FN",30912,15]]},{"n":"M4A4 | Temukau","c":"235,75,75","i":"87a11f0ecb78b9fdb114f83b75d1417ccdc7ba501b36743bf65ded5e251b81ff","v":[["FN",65580,2],["MW",36738,2],["FT",22776,6],["WW",21774,6],["BS",19980,6]]},{"n":"USP-S | Printstream","c":"235,75,75","i":"b3cb1f52a450487ad9e8252cbb9a8dfc2f3b2b87e110915151a4a3f5755303da","v":[["MW",43500,2],["FT",27180,6],["WW",26358,6]]},{"n":"AWP | Electric Hive","c":"211,44,230","i":"30f9fd16929770da6ba245077279c4273badec47744f09d3806c70285cdb130a","v":[["ST MW",48270,2],["FN",48066,2],["ST FT",35682,2],["WW",27576,6],["MW",21336,6],["FT",18732,6]]},{"n":"AWP | Crakow!","c":"211,44,230","i":"05aff8aa430dc951cc801cb58654641e91c58cb8d6794327e6f759144b82bd80","v":[["FN",50100,2],["MW",27720,6],["FT",16386,6],["WW",13212,21],["BS",12060,21]]},{"n":"AK-47 | Point Disarray","c":"211,44,230","i":"36224570277a26b3c80d30d26946f86eab5e0dbdb812238260779246cfd8af34","v":[["FN",34206,2],["ST MW",34104,2],["MW",14706,24],["WW",11328,21],["FT",9432,21]]},{"n":"P2000 | Wicked Sick","c":"211,44,230","i":"60664a76c710d1bcf9629df512439fb6a72eafceb9e63fe0348a0111a52e4bf2","v":[["FN",11070,21],["MW",3984,1392],["FT",2328,530],["WW",2160,530],["BS",2112,530]]},{"n":"Sawed-Off | Kiss♥Love","c":"211,44,230","i":"12c9871ce87d6a3eb4110e44d8e2772a3e73208a7e52f4f64ce3df209a7966fd","v":[["FN",10758,21],["MW",3984,1392],["FT",2622,530],["WW",2382,530],["BS",2334,530]]},{"n":"Glock-18 | Vogue","c":"211,44,230","i":"a71cc5f7dee682e1bf119cb9a43284c7cd901a46b3fe15b39c719f766b05db40","v":[["FN",7152,299],["MW",4242,1798],["WW",2814,545],["FT",2754,530],["BS",2706,530]]},{"n":"AWP | Exothermic","c":"136,71,255","i":"8f4d5d485542d898ab3e9d9a30802759f88c9c1a9b358455be28993e1b2b599b","v":[["FN",6114,3153],["MW",3408,1392],["WW",2106,530],["FT",2040,530],["BS",1890,530]]},{"n":"M4A4 | Evil Daimyo","c":"136,71,255","i":"e88f95d9e2fdc39699ea5844e5772ccbc4f7e24c886ff5cbfd1efec1a1eae57a","v":[["FN",5568,2212],["MW",3540,1392],["WW",2268,530],["FT",2244,530]]},{"n":"USP-S | Cortex","c":"211,44,230","i":"0b4d84b4e0bd04ca6c72f3af980bf46daf223c255a83d239cc0930767f210462","v":[["MW",4920,2212],["FT",2700,530],["WW",2436,530],["BS",2328,530]]},{"n":"USP-S | Bleeding Edge","c":"136,71,255","i":"c346fcbff43ad0a829f187a0e604d9abf8e944d45634c1dbb86bfb14f018687b","v":[["FN",3846,1392],["MW",2040,530],["FT",876,1590]]},{"n":"Desert Eagle | Trigger Discipline","c":"136,71,255","i":"0995bed46f1d35b10c7714f58f0545a96cf6d2ff95fa0c5beceb3f3d6a35492f","v":[["FN",3876,1392],["MW",1368,1630],["FT",594,1590],["BS",492,1590],["WW",492,1590]]},{"n":"Nova | Rising Sun","c":"136,71,255","i":"5405b49e23aa32577c8446e406a196f3ab90001d0a0cc47d4d3fbe2a9b0c2966","v":[["FN",2400,530],["MW",738,1590],["FT",366,1590],["WW",342,1590],["BS",330,1590]]},{"n":"CZ75-Auto | Tacticat","c":"136,71,255","i":"a22328f4e0d3c34bf21f6ece392c8e1b86fea1aae5fa4852d252ccb11a08d2f8","v":[["FN",1962,530],["MW",1146,1590],["FT",828,1590],["WW",768,1590],["BS",756,1590]]},{"n":"Dual Berettas | Flora Carnivora","c":"136,71,255","i":"dc1ce9ed568c8ccc626ac1b64b7d59a6bd1202acfbd3754043ba60996245d621","v":[["FN",2172,530],["MW",786,1590],["FT",354,1590],["BS",318,1590],["WW",318,1590]]},{"n":"Five-SeveN | Fraise Crane","c":"75,105,255","i":"08882edea0bed57e5e0c18a144010c3b9fab441bd0b79823487e1437e0e7438a","v":[["FN",1854,530],["MW",786,1590],["FT",168,1590],["WW",144,1590],["BS",138,1590]]},{"n":"Zeus x27 | Tosai","c":"136,71,255","i":"348f8132643ac79eeba263d1fcd5f09f4bddfbf240537e48d97c549b83556380","v":[["FN",1278,1590],["MW",588,1590],["FT",354,1590],["BS",342,1590],["WW",342,1590]]},{"n":"Galil AR | Sky Mandala","c":"75,105,255","i":"f07fc66d71443568b2201785b63182f8e293778d0aa6348f4f99e0cde5a83bfd","v":[["FN",1332,1590],["MW",570,1590],["FT",192,1590],["WW",192,1590],["BS",168,1590]]},{"n":"Glock-18 | Coral Bloom","c":"75,105,255","i":"6bdfd70fbc46f2dc55705fd894588d79ea883b7319418c74cd44a80f7f409298","v":[["FN",972,1590],["MW",396,1590],["WW",198,1590],["FT",174,1590],["BS",150,1590]]},{"n":"MAC-10 | Sakkaku","c":"136,71,255","i":"8c26cdc795a91601f6dff7cd902a0a8180b6472b416d3cba5999c644e16d5a63","v":[["FT",600,1590],["WW",294,1590],["BS",288,1590]]},{"n":"UMP-45 | Fragment","c":"75,105,255","i":"550d95a546774334eb85f1970e051844e3875b061b142fd75a2f69ca37a5a027","v":[["FN",594,1590],["MW",156,1590],["FT",96,1590],["WW",72,1590],["BS",72,1590]]}]},{"id":"voodoo","name":"Voodoo Case","price":12.0,"accent":"#4ee08a","dark":"#173d2a","glyph":"☠","items":[{"n":"Sport Gloves | Violet Beadwork","c":"235,75,75","i":"698d40925e2bc1335f57d25ea3c304b7278a8ee39c85e2bf116aab61b042f50d","v":[["MW",475188,6],["FT",181734,5],["WW",157980,5],["BS",118920,5]]},{"n":"Five-SeveN | Hyper Beast","c":"235,75,75","i":"d2ad14bdebcf7d9d1302cfdf3387c964731ba8d36948569fb8623f86be785ce3","v":[["FN",367128,5],["MW",270432,5],["FT",188904,5],["WW",188322,5],["BS",169236,5]]},{"n":"Bayonet | Doppler Phase 1","c":"235,75,75","i":"3632d84b3446616c6043747cbc5e7d6f6f67617f97cd4a2e419ec83f07ebeb26","v":[["FN",260142,5]]},{"n":"MAC-10 | Neon Rider","c":"235,75,75","i":"d73aff5d17ffe4bce2e7d20f1f78c0e721fd3647f8949b00ab7b776ce64fd2b2","v":[["FN",99576,5],["MW",90198,5],["WW",89430,5],["FT",88014,5]]},{"n":"M4A1-S | Vaporwave","c":"235,75,75","i":"0071ef7502835a3dba73069fb1f7093f8bd8ccc5ae3167bd3af23178d16170c4","v":[["FN",91626,5],["MW",55032,5],["FT",35526,5],["WW",34710,5],["BS",26724,5]]},{"n":"AWP | Crakow!","c":"211,44,230","i":"05aff8aa430dc951cc801cb58654641e91c58cb8d6794327e6f759144b82bd80","v":[["FN",50100,5],["MW",27720,5],["FT",16386,9],["WW",13212,9],["BS",12060,9]]},{"n":"M4A4 | Desolate Space","c":"211,44,230","i":"6d4b391e6fa9fe23ba98034fd6ef6202fa5897ee5a28919a37b3679f0243bbed","v":[["FN",41964,5],["MW",14514,9],["FT",9828,15],["BS",8892,15],["WW",8868,15]]},{"n":"SSG 08 | Turbo Peek","c":"211,44,230","i":"55b3052d78fb01a533558701acee995b1337b6da5a301b4315cde1bd570177ea","v":[["FN",31668,5],["MW",18390,12],["FT",11736,9],["WW",10836,9],["BS",10692,9]]},{"n":"FAMAS | Pulse","c":"136,71,255","i":"d4c38023eefc495cce9df49c80f06c474ce9b8aa356f9598f804532beed140bf","v":[["FN",16824,9],["WW",7704,15],["MW",6558,15],["FT",5532,15]]},{"n":"M4A1-S | Party Animal","c":"211,44,230","i":"0597aacef38d532bb785437419293026993858e7b3cb0b6c29a894e966911331","v":[["FN",16038,9],["MW",9894,21],["WW",5412,15],["FT",5136,284],["BS",4752,283]]},{"n":"CZ75-Auto | Xiangliu","c":"211,44,230","i":"332f5cb00128cc674d6cc9e55ee91780da31e443fea65356a62942a252f6c4f0","v":[["FN",11046,9],["MW",10092,15],["FT",8454,15],["WW",8442,15],["BS",8382,15]]},{"n":"Glock-18 | Shinobu","c":"211,44,230","i":"8de807d68ed75625e53b7787a77bbca92b7b61a1553e9f41e3b1581c8c216618","v":[["FN",12990,9],["MW",5832,15],["FT",3414,309],["WW",3156,308],["BS",3024,440]]},{"n":"MAC-10 | Curse","c":"136,71,255","i":"8701e9ef2b4edaa3860c2dc08caa824c7637d95d012ea149491fd92f3ee48b2a","v":[["BS",11334,9],["FN",8118,15],["WW",7902,15],["FT",4302,283],["MW",4116,310]]},{"n":"USP-S | Black Lotus","c":"75,105,255","i":"e8744e7b598d2ab32587dcac6a727198d50faf67dea3ae0a5e82cd9445a1cb53","v":[["FN",14064,9],["MW",1872,2111],["FT",828,1],["WW",636,1387],["BS",594,1387]]},{"n":"Galil AR | Chromatic Aberration","c":"211,44,230","i":"48d6627a95e71ef7013c2e2593cd8132d4b53dffe42f360c7ded68b58ac306f7","v":[["FN",12024,9],["MW",5268,15],["FT",2910,449],["WW",2568,443],["BS",2520,447]]},{"n":"P250 | Vino Primo","c":"136,71,255","i":"b7c3db6ce7cf360594531b5c294934c84bc76ad6b7c1900d929a53242cfa0ee2","v":[["FN",7746,15],["MW",2136,451],["FT",1068,3230],["WW",696,1377],["BS",618,1387]]},{"n":"USP-S | Sleeping Potion","c":"136,71,255","i":"d1c40f57e97c130098ac47e1c63cb3a3e235e5d4255ee828544b3bd441d7c0e6","v":[["FN",5556,15],["MW",2742,449],["FT",924,1],["WW",726,1377],["BS",594,1387]]},{"n":"Desert Eagle | Firebreathing","c":"136,71,255","i":"d98ebeb6d665f1f50eaf98b6fbfb5e828591b777a86b494e9a713ad93fd1c87d","v":[["FN",3906,311],["MW",1602,2111],["FT",786,1379],["WW",684,1377],["BS",642,1387]]},{"n":"MAC-10 | Saibā Oni","c":"136,71,255","i":"79162b0affca1b0bdf0a7bb61b2c88d0b1b732ce4722c9fbf50f0ca7afc44ffa","v":[["FN",3294,308],["MW",1920,2111],["FT",822,1083],["WW",798,1378],["BS",774,1379]]},{"n":"Glock-18 | Moonrise","c":"136,71,255","i":"3c30133d785bc6ecf761a97d562dabac5b92fadb9e51a7b064c96939a7536d20","v":[["FN",1920,2116],["MW",1212,3229],["FT",744,1376],["WW",744,1375],["BS",726,1377]]},{"n":"Dual Berettas | Flora Carnivora","c":"136,71,255","i":"dc1ce9ed568c8ccc626ac1b64b7d59a6bd1202acfbd3754043ba60996245d621","v":[["FN",2172,446],["MW",786,1378],["FT",354,1484],["BS",318,1448],["WW",318,1446]]},{"n":"R8 Revolver | Crazy 8","c":"136,71,255","i":"7c146d232c37ab7211362b7867365994c5f37f27bdbb2ebff0c976c75ab0775c","v":[["FN",2106,454],["MW",732,1382],["FT",354,1483],["BS",330,1594],["WW",324,1446]]},{"n":"Five-SeveN | Violent Daimyo","c":"75,105,255","i":"59b970571122f24530f910a861fb055ef8b675428bd3f2571fd6186a8e6def88","v":[["FN",1506,3229],["MW",516,1385],["FT",378,1575],["WW",318,1485],["BS",306,1485]]},{"n":"UMP-45 | Moonrise","c":"136,71,255","i":"61cc40ebe4c6f67b7e67505d35a1825c52cc825aebcb3bb307e727952c483704","v":[["FN",1134,2668],["MW",552,1387],["FT",498,1385],["WW",492,1385]]},{"n":"PP-Bizon | Space Cat","c":"136,71,255","i":"76cab66c3dbe11175b7c4c1fc2c8da020833d204f4fbf2bf6415c0f9eba65c86","v":[["FN",1104,2667],["MW",540,1385],["FT",426,1385],["WW",420,1385],["BS",414,1575]]},{"n":"M249 | Downtown","c":"136,71,255","i":"314927dbbe45794c7f3bff7518cb50ff0eff59a667803f4af501bfab3a523940","v":[["FN",1044,1],["MW",486,1385],["FT",318,1484],["BS",312,1693],["WW",306,1484]]},{"n":"PP-Bizon | RMX","c":"75,105,255","i":"39d217219d54ddc280d9e4579a557ec6a86f4d89057980fc201e2d2d24fff5ad","v":[["FN",744,1375],["MW",180,1683],["FT",90,1675],["WW",72,1526],["BS",72,1526]]},{"n":"Five-SeveN | Flame Test","c":"75,105,255","i":"96974f93e1714c72753c5fbc674b938550fce456dac05e8fc7cfd2702d886976","v":[["FN",408,1575],["FT",198,1682],["MW",186,1682],["WW",144,1679],["BS",138,1680]]}]},{"id":"cursed","name":"Cursed Case","price":33.0,"accent":"#ff3b3b","dark":"#3a0b0b","glyph":"✠","items":[{"n":"M9 Bayonet | Doppler Phase 1","c":"235,75,75","i":"d322e9249de16b16eff7ac15f8f8cb1f933919f274ca20009c39ed4654eaf17a","v":[["FN",604614,15]]},{"n":"Bayonet | Doppler Phase 1","c":"235,75,75","i":"3632d84b3446616c6043747cbc5e7d6f6f67617f97cd4a2e419ec83f07ebeb26","v":[["FN",260142,12]]},{"n":"Huntsman Knife | Doppler Phase 1","c":"235,75,75","i":"622b9e21322b4dc4c2597fd7a894c4abccd40caca40f7c70fac60cfe77239795","v":[["FN",191820,12]]},{"n":"Driver Gloves | Imperial Plaid","c":"235,75,75","i":"50c769a95e7317e79529f89717e60477fcf29e33084753c1bbf5762285100847","v":[["MW",230382,12],["FT",111810,12],["WW",96618,12],["BS",75768,12]]},{"n":"M4A1-S | Vaporwave","c":"235,75,75","i":"0071ef7502835a3dba73069fb1f7093f8bd8ccc5ae3167bd3af23178d16170c4","v":[["FN",91626,12],["MW",55032,71],["FT",35526,71],["WW",34710,71],["BS",26724,52]]},{"n":"AK-47 | Nightwish","c":"235,75,75","i":"3622b696968842ad603c25abdaccfc0ba264a9714bdf979099a381ad724b802f","v":[["MW",54402,71],["FT",48450,71],["BS",45594,71],["WW",45534,71]]},{"n":"AWP | Chromatic Aberration","c":"235,75,75","i":"33b9a6f11e5bae61e3c292870e669ebb423773bf53301578089c9a69eb626dae","v":[["FN",49314,71],["MW",28644,56],["FT",23862,52],["WW",22344,52],["BS",21036,52]]},{"n":"Glock-18 | Gold Toof","c":"235,75,75","i":"4b4a639f5a1597f8f8d13aca89eaf438802367e273a56d927a6569732c9f7c0d","v":[["MW",25602,53],["FT",21396,52],["BS",21372,52],["WW",20286,52]]},{"n":"AWP | Crakow!","c":"211,44,230","i":"05aff8aa430dc951cc801cb58654641e91c58cb8d6794327e6f759144b82bd80","v":[["MW",27720,52],["FT",16386,52],["WW",13212,521],["BS",12060,521]]},{"n":"P90 | Shallow Grave","c":"211,44,230","i":"e86b95745f0ed59ff8e3159f06835a6a913869b0262a6de0d940a9683ebf3081","v":[["MW",23508,52],["WW",19950,52],["FT",17808,52],["BS",17196,52],["ST FT",6864,2021]]},{"n":"USP-S | Purple DDPAT","c":"75,105,255","i":"ea57f0dac2c864c34e964d7e65931aa6a6c2ba45c76dcc44b095ea1014ec8f72","v":[["FN",20442,52],["MW",4266,1354],["FT",1926,2500]]},{"n":"AWP | Fever Dream","c":"211,44,230","i":"0752ee43d1ca3e2e2bb69de75fd890d80bb8e9a0460aeb7f6961e9cb31ad281f","v":[["MW",9924,271],["WW",8958,271],["FT",8886,271],["BS",8862,271]]},{"n":"M4A1-S | Black Lotus","c":"211,44,230","i":"759a76d29cd23d7a202a529709911c8f0e023ef71750905941172a53bae7b58f","v":[["FN",8376,2021],["MW",4842,1354],["WW",3210,1354],["BS",3102,1354],["FT",2970,1354]]},{"n":"FAMAS | Rapid Eye Movement","c":"211,44,230","i":"4b8b498727d3603e6d84b88aa104fa4f342f5dc5fc295c37eb664ee9b460dddc","v":[["MW",4944,1354],["FT",4308,1354],["WW",4164,1354]]},{"n":"P250 | Vino Primo","c":"136,71,255","i":"b7c3db6ce7cf360594531b5c294934c84bc76ad6b7c1900d929a53242cfa0ee2","v":[["FN",7746,2021],["MW",2136,2500],["FT",1068,2500],["WW",696,2500],["BS",618,2500]]},{"n":"AK-47 | Slate","c":"136,71,255","i":"0817f711fd2bf726b60de4701328b4ca603b21ad11a4aca7c0b26358a07d58bb","v":[["MW",5184,1358],["FT",3276,1354],["WW",2928,409],["BS",2814,2500]]},{"n":"MAC-10 | Saibā Oni","c":"136,71,255","i":"79162b0affca1b0bdf0a7bb61b2c88d0b1b732ce4722c9fbf50f0ca7afc44ffa","v":[["FN",3294,1354],["MW",1920,2500],["FT",822,2500],["WW",798,2500],["BS",774,2500]]},{"n":"Charm | Lil' Monster","c":"211,44,230","i":"030daa494d8ca3bf89328ae42d54f34e326659d7c4ca1f808abadeb51604f367","v":[["-",1950,2500]]},{"n":"AK-47 | Crossfade","c":"75,105,255","i":"a5e1147cd480e4a647bdc733dbefe16b7cdeb3515a5e7bc542d71389ac83d462","v":[["MW",2148,2500],["FT",1554,2500],["WW",1500,2500],["BS",1464,2500]]},{"n":"USP-S | Black Lotus","c":"75,105,255","i":"e8744e7b598d2ab32587dcac6a727198d50faf67dea3ae0a5e82cd9445a1cb53","v":[["ST WW",2124,2500],["MW",1872,2500],["FT",828,2500],["WW",636,2500],["BS",594,2500]]},{"n":"Dual Berettas | Flora Carnivora","c":"136,71,255","i":"dc1ce9ed568c8ccc626ac1b64b7d59a6bd1202acfbd3754043ba60996245d621","v":[["FN",2172,2500],["MW",786,2500],["FT",354,2500],["BS",318,2500],["WW",318,2500]]},{"n":"PP-Bizon | Space Cat","c":"136,71,255","i":"76cab66c3dbe11175b7c4c1fc2c8da020833d204f4fbf2bf6415c0f9eba65c86","v":[["ST FN",1374,2500],["FN",1104,2500],["ST MW",588,2500],["MW",540,2500],["FT",426,2500]]}]},{"id":"divine","name":"Divine Case","price":270.0,"accent":"#ffd36b","dark":"#4a3510","glyph":"✦","items":[{"n":"AWP | The Prince","c":"235,75,75","i":"91bb047cb6a7ad9e06713e8e947370f9dd5a4f8a4e3526a8778cde6e44c2c2f5","v":[["MW",1321842,18]]},{"n":"Talon Knife | Doppler Sapphire","c":"235,75,75","i":"3c98f2a0cd47ddb232f4cb5a1574a7064c889048ba06a0dce0d6007f7bc472a4","v":[["FN",1114998,18]]},{"n":"Sport Gloves | Amphibious","c":"235,75,75","i":"7a16a2d10b5ddf7be90805a2d4e8e30a7c688466139c850d240940ac47b2af48","v":[["FN",1691562,21],["MW",409452,9]]},{"n":"M4A4 | Eye of Horus","c":"235,75,75","i":"0fdc4d8e598e2d77b8c57a92343eb32cc3cb310ac616d79aa27d8ef9e9872cc9","v":[["FN",679542,18],["MW",328260,9],["FT",182682,16]]},{"n":"Glock-18 | Twilight Galaxy","c":"211,44,230","i":"48d8fcaf7159098e05caa04651eb533224603336b1e49fcb1d9bc95a4f05382b","v":[["FN",456864,12],["MW",182094,16]]},{"n":"Skeleton Knife | Case Hardened","c":"235,75,75","i":"cacfa2981eebbf3f351e1340b05ef5ca1a6e92acfbd1f2970212e6ba20194462","v":[["FN",448026,9],["MW",230802,9],["FT",175494,16]]},{"n":"AK-47 | Vulcan","c":"235,75,75","i":"295a38430834ff2d0b1bec1630dd941ba5f62c65a097baca588017810f4a3826","v":[["FN",401676,9],["MW",274908,9],["FT",133590,16]]},{"n":"P250 | Whiteout","c":"75,105,255","i":"e9c316d2a8e1663b960063a9dc7f1c551f694741d29947a19479b34d3f5b6253","v":[["FN",305742,9],["MW",37770,686],["FT",24816,686]]},{"n":"Flip Knife | Lore","c":"235,75,75","i":"5614157aa929e4946478e68d727f2a7a90e3bc04d40d74e247618721534356b3","v":[["FN",200118,433],["MW",147318,16],["FT",114756,2308]]},{"n":"USP-S | Printstream","c":"235,75,75","i":"b3cb1f52a450487ad9e8252cbb9a8dfc2f3b2b87e110915151a4a3f5755303da","v":[["ST FN",189594,16],["ST MW",88038,1638],["FN",64212,750],["MW",43500,699]]},{"n":"AK-47 | The Empress","c":"235,75,75","i":"5a1a6cdf989191dacc3092c612472e613c20da224b6a81de4c82f2fc985cc326","v":[["FN",160464,16],["MW",79230,757],["FT",72606,757]]},{"n":"MP7 | Whiteout","c":"75,105,255","i":"96d8a0f22fcfc828fe5c555d500627c6cb1a6a9673d7dd0fb4ee3ce2b15d2b03","v":[["MW",154380,16],["FT",24894,686],["WW",23058,3054]]},{"n":"CZ75-Auto | Victoria","c":"235,75,75","i":"1c62ab2a7405105eb2e55ad02c4e258082d20ee378e81657f47beffd27029d79","v":[["FN",75102,757],["FT",63930,750],["MW",62412,750]]},{"n":"M4A1-S | Vaporwave","c":"235,75,75","i":"0071ef7502835a3dba73069fb1f7093f8bd8ccc5ae3167bd3af23178d16170c4","v":[["FN",91626,1079],["MW",55032,751],["FT",35526,686],["WW",34710,686],["BS",26724,686]]},{"n":"MP9 | Starlight Protector","c":"235,75,75","i":"2232dfd9e9b20c536112dc39327c42885891fd77f085cb48caa75c5335f3db6d","v":[["FN",68610,757],["MW",55236,750],["BS",48636,751],["FT",47988,751],["WW",47370,751]]},{"n":"AK-47 | Inheritance","c":"235,75,75","i":"1cd4975a6e449ed9c5497fc0c0308c48ef4e1afe674b1efcd6374d8eca68c66b","v":[["FN",68610,2806],["MW",39744,686],["FT",26178,686],["WW",25974,686],["BS",22494,3043]]},{"n":"Desert Eagle | Printstream","c":"235,75,75","i":"f2eb4023353efc1e37477ce1e5c1a0d91a7cf9765be16f84f153693c9d0992b0","v":[["FN",51852,751],["MW",33708,686],["FT",26748,686]]},{"n":"FAMAS | Commemoration","c":"235,75,75","i":"7d3198bb6a4509e76534ba2229bd1b2c715764cdd392384984b2667e89944d0f","v":[["FN",37830,686],["MW",26370,686],["BS",25686,686],["FT",23910,686],["WW",23760,686]]},{"n":"AUG | Fleet Flock","c":"211,44,230","i":"4131b7297e8b0290e10504e8f2305e0653f5c435b981e95b4fb4550fff4978ab","v":[["FN",15312,3043],["MW",9420,3043],["FT",8460,3043]]},{"n":"MAG-7 | Justice","c":"211,44,230","i":"4d4cab6dac714867c307376c1d5eb1d328374e6b743dd8e669215d5e9aa8887a","v":[["FN",11418,3043],["MW",5088,3043]]},{"n":"UMP-45 | Gold Bismuth","c":"136,71,255","i":"e5e4ea15580ecb8d673e80b7f71a8ed985ac891c57a014a987b8646edcc96c0f","v":[["FN",10620,3043],["MW",5088,3043],["WW",2220,3043],["BS",1938,3043],["FT",1932,3043]]},{"n":"Zeus x27 | Olympus","c":"211,44,230","i":"bd0af5ac9576498397bc2cfb96f11e1c94714b7ad3de2b206a361420ec24ede6","v":[["FN",5538,3043],["MW",3168,3043],["WW",2316,3043],["FT",2238,3043],["BS",2238,3043]]},{"n":"Dual Berettas | Sweet Little Angels","c":"136,71,255","i":"5bbb414a2e6f4e83e5193f3d469d27e8f2873eb6ea1d1636559959cea4a210a9","v":[["FN",4932,3043],["MW",2838,3043],["FT",1332,3043]]},{"n":"Sawed-Off | Serenity","c":"136,71,255","i":"e2339ebe6247232af66d515fe7d825e16af246ac2a0f577aa8d0ce28c8b531d5","v":[["FN",2988,3043],["MW",1704,3043],["FT",1452,3043]]}]}];
+const IMG = h => `https://items.csgo-skins.com/images/${h}.webp`;
+const WEAR = {FN:'Nova de Fábrica',MW:'Pouco Usada',FT:'Testada em Campo',WW:'Bem Desgastada',BS:'Veterana de Guerra','-':''};
+const brl = c => 'R$ ' + (c/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = (x,d) => x.toLocaleString('pt-BR',{maximumFractionDigits:d==null?3:d}) + '%';
+const esc = s => s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const wearText = w => { const st = w.startsWith('ST '); const k = st ? w.slice(3) : w; return (st ? 'StatTrak™ ' : '') + (WEAR[k] ?? k); };
+
+/* ---------- prepare data ---------- */
+for (const c of CASES) {
+  c.priceC = Math.round(c.price*100);
+  c.flat = []; // every variant with its ticket range
+  let acc = 0, ev = 0, profitT = 0;
+  for (const it of c.items) {
+    it.t = it.v.reduce((s,v)=>s+v[2],0);
+    it.min = Math.min(...it.v.map(v=>v[1])); it.max = Math.max(...it.v.map(v=>v[1]));
+    const [gun, skin] = it.n.split(' | ');
+    it.gun = gun; it.skin = skin || gun;
+    for (const v of it.v) {
+      c.flat.push({it, wear:v[0], val:v[1], t:v[2], from:acc+1, to:acc+v[2]});
+      acc += v[2]; ev += v[1]*v[2]; if (v[1] > c.priceC) profitT += v[2];
+    }
+  }
+  c.ev = ev/100000; c.rtp = c.ev / c.priceC; c.profitChance = profitT/1000;
+  c.top = c.items.reduce((a,b)=> b.max>a.max?b:a);
+  c.items.sort((a,b)=> b.max - a.max);
+}
+
+/* ---------- RNG: a ticket from 1..100000, like the site ---------- */
+function roll(c){
+  const a = new Uint32Array(1); let t;
+  do { crypto.getRandomValues(a); t = a[0]; } while (t >= 4294900000); // avoid modulo bias
+  t = (t % 100000) + 1;
+  let lo = 0, hi = c.flat.length-1;
+  while (lo < hi) { const m = (lo+hi)>>1; if (c.flat[m].to < t) lo = m+1; else hi = m; }
+  return Object.assign({ticket:t}, c.flat[lo]);
+}
+// filler tiles for the reel: rare items show up MORE than their real chance (sqrt weighting)
+function filler(c){
+  if (!c._fw){ c._fw = c.items.map(it=>Math.sqrt(it.t)); c._fs = c._fw.reduce((a,b)=>a+b,0); }
+  let r = Math.random()*c._fs, i = 0;
+  while ((r -= c._fw[i]) > 0) i++;
+  const it = c.items[i]; const v = it.v[Math.floor(Math.random()*it.v.length)];
+  return {it, wear:v[0], val:v[1]};
+}
+
+/* ---------- persistence ---------- */
+const LS = 'caixa-de-mentira-v1';
+let S = {stats:{}, hist:[], sound:true, fast:false};
+try { const raw = localStorage.getItem(LS); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch(e){}
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){} };
+const st = id => S.stats[id] ||= {n:0, spent:0, won:0, best:null, profitN:0, curve:[0]};
+function totals(){
+  let n=0,spent=0,won=0;
+  for (const k in S.stats){ n+=S.stats[k].n; spent+=S.stats[k].spent; won+=S.stats[k].won; }
+  return {n,spent,won};
+}
+
+/* ---------- sound ---------- */
+let AC;
+function beep(freq, dur, type='square', vol=.05){
+  if (!S.sound) return;
+  try {
+    AC ||= new (window.AudioContext||window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, AC.currentTime); g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime+dur);
+    o.connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime+dur);
+  } catch(e){}
+}
+const tick = () => beep(1400, .03, 'square', .03);
+function reveal(rar){
+  const seq = {blue:[523], purple:[523,659], pink:[523,659,784], red:[523,659,784,1047]}[rar];
+  seq.forEach((f,i)=>setTimeout(()=>beep(f,.25,'triangle',.08), i*110));
+}
+const rarity = color => ({'75,105,255':'blue','136,71,255':'purple','211,44,230':'pink','235,75,75':'red'}[color] || 'blue');
+
+/* ---------- rendering helpers ---------- */
+const crate = (c, cls='') => `<div class="crate ${cls}" style="--c:${c.accent};--d:${c.dark}"><div class="body"></div><div class="lid"></div><div class="band"></div><div class="glyph">${c.glyph}</div></div>`;
+// Where the skin photos can't load (e.g. a sandboxed page), each one becomes a typographic card.
+const SPECIAL = /Knife|Bayonet|Gloves|Karambit|Daggers/;
+function imgFail(el){
+  document.body.classList.add('noimg-mode');
+  const g = el.dataset.gun || '';
+  const d = document.createElement('div');
+  d.className = 'noimg';
+  d.textContent = (SPECIAL.test(g) ? '★ ' : '') + g;
+  el.replaceWith(d);
+}
+const img = it => `<img src="${IMG(it.i)}" alt="${esc(it.n)}" data-gun="${esc(it.gun)}" onerror="imgFail(this)">`;
+
+function renderWallet(){
+  const t = totals(); const net = t.won - t.spent;
+  document.getElementById('wallet').innerHTML = `
+    <div class="chip">Caixas abertas <b>${t.n.toLocaleString('pt-BR')}</b></div>
+    <div class="chip">Teria gasto <b>${brl(t.spent)}</b></div>
+    <div class="chip">Resultado <b class="${net<0?'neg':net>0?'pos':''}">${net>=0?'+':'−'}${brl(Math.abs(net))}</b></div>`;
+}
+
+/* ---------- home ---------- */
+function home(){
+  cur = null; document.body.style.setProperty('--accent', '#7c8cff');
+  const v = document.getElementById('view');
+  v.innerHTML = `
+    <div class="banner">Abre à vontade: aqui as caixas usam <b>exatamente as mesmas chances</b> das páginas originais (cada caixa tem 100.000 tickets, e cada skin/desgaste tem os seus). A diferença é que aqui não sai dinheiro do seu bolso — e o contador lá em cima mostra quanto você <b>teria</b> gasto.</div>
+    <h2>Escolha a caixa</h2>
+    <div class="grid">${CASES.map(c=>`
+      <div class="casecard" style="--c:${c.accent}" data-id="${c.id}">
+        ${crate(c)}
+        <div class="nm">${c.name}</div>
+        <div class="pr">${brl(c.priceC)} por abertura</div>
+        <div class="facts">
+          <div class="fact">Volta em média<b class="bad">${brl(c.ev)}</b></div>
+          <div class="fact">Retorno médio<b class="bad">${pct(c.rtp*100,1)}</b></div>
+          <div class="fact">Chance de lucrar<b>${pct(c.profitChance,2)}</b></div>
+          <div class="fact">Item mais caro<b>${pct(c.top.t/1000)}</b></div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <h2>A conta que o site não mostra</h2>
+    <div class="panel small" style="font-size:14px">
+      ${CASES.map(c=>`<div class="kv"><span>${c.name}: você paga ${brl(c.priceC)} e recebe, em média, ${brl(c.ev)}</span><b class="neg">−${brl(c.priceC-c.ev)} por caixa</b></div>`).join('')}
+      <p style="margin:12px 0 0">"Retorno médio" é o valor esperado: some (preço de cada skin × chance dela). Abaixo de 100% quer dizer que, abrindo muitas vezes, você perde dinheiro — sempre. "Chance de lucrar" é a chance de uma única abertura vir com um item que vale mais que a caixa (e o valor de "venda" no site costuma ser ainda menor).</p>
+      <p style="margin:10px 0 0">Repare também na roleta: as facas e luvas passam por ela muito mais vezes do que realmente saem. O resultado é sorteado antes da animação, com as chances reais; os itens em volta são só enfeite — e enfeite que dá a sensação de "quase".</p>
+    </div>`;
+  v.querySelectorAll('.casecard').forEach(el=>el.onclick=()=>openCase(el.dataset.id));
+  renderWallet();
+  window.scrollTo({top:0});
+}
+
+/* ---------- case page ---------- */
+let cur = null, qty = 1, spinning = false;
+function openCase(id){
+  cur = CASES.find(c=>c.id===id);
+  document.body.style.setProperty('--accent', cur.accent);
+  const c = cur;
+  const v = document.getElementById('view');
+  v.innerHTML = `
+    <button class="back" id="back">← Voltar às caixas</button>
+    <div class="casehead" style="--c:${c.accent}">
+      ${crate(c,'')}
+      <div><h1>${c.name}</h1><div class="sub">${brl(c.priceC)} por caixa · retorno médio ${pct(c.rtp*100,1)} · chance de lucrar ${pct(c.profitChance,2)}</div></div>
+    </div>
+    <div class="reels" id="reels"></div>
+    <div class="controls" style="--c:${c.accent}">
+      <div class="qty" id="qty">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n===qty?'on':''}">${n}x</button>`).join('')}</div>
+      <button class="open" id="openBtn">Abrir</button>
+      <button class="ghost" id="massBtn">Simular 1.000 aberturas</button>
+    </div>
+    <div class="hint">Barra de espaço também abre</div>
+    <div class="results" id="results"></div>
+    <div class="cols">
+      <div>
+        <h2>Últimos drops</h2>
+        <div class="history" id="history"></div>
+        <h2>Conteúdo da caixa</h2>
+        <div class="items">${c.items.map(it=>`
+          <div class="item" style="--r:${it.c}">
+            <span class="odds">${pct(it.t/1000)}</span>
+            ${img(it)}
+            <div class="n" title="${esc(it.n)}">${esc(it.skin)}</div>
+            <div class="pr">${esc(it.gun)} · ${it.min===it.max?brl(it.min):brl(it.min)+' – '+brl(it.max)}</div>
+            <div class="tip"><b>${esc(it.n)}</b><table>${it.v.map(v=>`<tr><td>${wearText(v[0])||'—'}<br><span style="color:var(--muted)">${brl(v[1])}</span></td><td>${pct(v[2]/1000)}</td></tr>`).join('')}</table></div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div>
+        <h2>Sua sessão nesta caixa</h2>
+        <div class="panel" id="stats"></div>
+      </div>
+    </div>`;
+  document.getElementById('back').onclick = home;
+  document.getElementById('openBtn').onclick = spin;
+  document.getElementById('massBtn').onclick = () => mass(1000);
+  document.querySelectorAll('#qty button').forEach(b=>b.onclick=()=>{ if(spinning) return; qty=+b.dataset.n; document.querySelectorAll('#qty button').forEach(x=>x.classList.toggle('on',x===b)); buildIdle(); });
+  buildIdle(); renderStats(); renderHistory(); renderWallet();
+  window.scrollTo({top:0});
+}
+
+const STEP = () => qty>1 ? 124 : 156; // tile width + gap
+function tileHTML(x, win){
+  const it = x.it;
+  return `<div class="tile ${win?'':''}" style="--r:${it.c}">${img(it)}<div class="w">${esc(it.gun)}</div><div class="s">${esc(it.skin)}</div></div>`;
+}
+function buildIdle(){
+  const box = document.getElementById('reels'); if (!box) return;
+  box.classList.toggle('multi', qty>1);
+  box.innerHTML = Array.from({length:qty},()=>`<div class="reel"><div class="marker"></div><div class="strip">${Array.from({length:14},()=>tileHTML(filler(cur))).join('')}</div></div>`).join('');
+  box.querySelectorAll('.reel').forEach(r=>{
+    const s = r.querySelector('.strip'); const w = r.clientWidth;
+    s.style.transform = `translateX(${w/2 - STEP()*7 + 3}px)`;
+  });
+}
+
+const N_TILES = 64, WIN_AT = 56;
+function spin(){
+  if (spinning || !cur) return;
+  spinning = true;
+  const c = cur, btn = document.getElementById('openBtn'); btn.disabled = true;
+  document.getElementById('results').innerHTML = '';
+  document.querySelector('.casehead .crate')?.classList.add('shake');
+  const wins = Array.from({length:qty},()=>roll(c));
+  const box = document.getElementById('reels');
+  box.innerHTML = wins.map(w=>{
+    const tiles = Array.from({length:N_TILES},(_,i)=> i===WIN_AT ? tileHTML(w,true) : tileHTML(filler(c)));
+    return `<div class="reel"><div class="marker"></div><div class="strip">${tiles.join('')}</div></div>`;
+  }).join('');
+  const step = STEP(), tileW = step-6;
+  const reels = [...box.querySelectorAll('.reel')].map(r=>{
+    const strip = r.querySelector('.strip');
+    const w = r.clientWidth;
+    const inside = 10 + Math.random()*(tileW-20);
+    const start = w/2 - step*2;
+    const end = w/2 - (WIN_AT*step + inside);
+    strip.style.transform = `translateX(${start}px)`;
+    return {strip, start, end, w};
+  });
+  const dur = S.fast ? 1800 : 6500 + Math.random()*800;
+  const t0 = performance.now(); let lastIdx = -1;
+  const ease = t => 1 - Math.pow(1-t, 4.2);
+  function frame(now){
+    const t = Math.min(1, (now-t0)/dur), e = ease(t);
+    for (const r of reels){ const x = r.start + (r.end - r.start)*e; r.strip.style.transform = `translateX(${x}px)`; r.x = x; }
+    const r0 = reels[0]; const idx = Math.floor((r0.w/2 - r0.x)/step);
+    if (idx !== lastIdx){ lastIdx = idx; if (t < 1) tick(); }
+    if (t < 1) requestAnimationFrame(frame); else done();
+  }
+  requestAnimationFrame(frame);
+  function done(){
+    box.querySelectorAll('.reel').forEach(r=>r.querySelectorAll('.tile')[WIN_AT].classList.add('win'));
+    document.querySelector('.casehead .crate')?.classList.remove('shake');
+    let best = 'blue'; const order = ['blue','purple','pink','red'];
+    for (const w of wins){ record(c, w); const rr = rarity(w.it.c); if (order.indexOf(rr) > order.indexOf(best)) best = rr; }
+    reveal(best);
+    if (best==='red' || best==='pink'){ const f=document.getElementById('flash'); f.style.background=`radial-gradient(circle at 50% 30%, rgba(${best==='red'?'235,75,75':'211,44,230'},.8), transparent 60%)`; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+    document.getElementById('results').innerHTML = wins.map(w=>resultCard(c,w)).join('');
+    renderStats(); renderHistory(); renderWallet(); save();
+    spinning = false; btn.disabled = false;
+  }
+}
+
+function record(c, w){
+  const s = st(c.id);
+  s.n++; s.spent += c.priceC; s.won += w.val;
+  if (w.val > c.priceC) s.profitN++;
+  if (!s.best || w.val > s.best.val) s.best = {n:w.it.n, i:w.it.i, c:w.it.c, wear:w.wear, val:w.val};
+  s.curve.push(s.won - s.spent); if (s.curve.length > 2000) s.curve = s.curve.filter((_,i)=>i%2===0);
+  S.hist.unshift({cid:c.id, n:w.it.n, i:w.it.i, c:w.it.c, wear:w.wear, val:w.val}); S.hist.length = Math.min(S.hist.length, 40);
+}
+
+function resultCard(c, w){
+  const diff = w.val - c.priceC;
+  return `<div class="res" style="--r:${w.it.c}">${img(w.it)}<div class="t">
+    <div class="n" title="${esc(w.it.n)}">${esc(w.it.n)}</div>
+    <div class="m">${wearText(w.wear)||'—'} · chance ${pct(w.t/1000)} (ticket #${w.ticket.toLocaleString('pt-BR')})</div>
+    <div class="p">${brl(w.val)}</div>
+    <div class="d ${diff>=0?'pos':'neg'}">${diff>=0?'+':'−'}${brl(Math.abs(diff))} vs. preço da caixa</div></div></div>`;
+}
+
+function renderHistory(){
+  const el = document.getElementById('history'); if (!el) return;
+  const h = S.hist.filter(x=>x.cid===cur.id);
+  el.innerHTML = h.length ? h.map(x=>`<div class="hist" style="--r:${x.c}" title="${esc(x.n)} · ${wearText(x.wear)} · ${brl(x.val)}"><img src="${IMG(x.i)}" alt="" data-gun="${esc(x.n.split(' | ')[0])}" onerror="imgFail(this)"></div>`).join('') : '<div class="empty">Nada ainda. Abre uma aí.</div>';
+}
+
+function renderStats(){
+  const el = document.getElementById('stats'); if (!el) return;
+  const c = cur, s = st(c.id); const net = s.won - s.spent;
+  el.innerHTML = `
+    <div class="kv"><span>Caixas abertas</span><b>${s.n.toLocaleString('pt-BR')}</b></div>
+    <div class="kv"><span>Teria pago</span><b>${brl(s.spent)}</b></div>
+    <div class="kv"><span>Valor das skins</span><b>${brl(s.won)}</b></div>
+    <div class="kv"><span>Resultado</span><b class="${net<0?'neg':net>0?'pos':''}">${net>=0?'+':'−'}${brl(Math.abs(net))}</b></div>
+    <div class="kv"><span>Seu retorno</span><b>${s.spent?pct(s.won/s.spent*100,1):'—'} <span style="color:var(--muted);font-weight:400">(esperado ${pct(c.rtp*100,1)})</span></b></div>
+    <div class="kv"><span>Aberturas com lucro</span><b>${s.n?pct(s.profitN/s.n*100,1):'—'}</b></div>
+    <div class="kv"><span>Melhor drop</span><b style="text-align:right">${s.best?esc(s.best.n)+'<br><span style="color:var(--muted);font-weight:400">'+brl(s.best.val)+'</span>':'—'}</b></div>
+    <h3 style="margin-top:14px">Saldo ao longo do tempo</h3>
+    <canvas id="curve" width="600" height="220"></canvas>
+    <p class="small">A linha tende a descer: cada abertura, na média, tira ${brl(c.priceC - c.ev)} de você. Os picos são os drops raros que fazem a gente voltar.</p>
+    <button class="ghost" id="resetBtn" style="width:100%;margin-top:6px">Zerar estatísticas desta caixa</button>`;
+  drawCurve(document.getElementById('curve'), s.curve);
+  document.getElementById('resetBtn').onclick = () => { delete S.stats[c.id]; S.hist = S.hist.filter(x=>x.cid!==c.id); save(); renderStats(); renderHistory(); renderWallet(); };
+}
+
+function drawCurve(cv, pts){
+  const g = cv.getContext('2d'), W = cv.width, H = cv.height, p = 14;
+  g.clearRect(0,0,W,H);
+  if (pts.length < 2){ g.fillStyle='#8a92ad'; g.font='22px Inter'; g.fillText('Abra algumas caixas pra ver o gráfico', p, H/2); return; }
+  const mn = Math.min(0,...pts), mx = Math.max(0,...pts), rg = (mx-mn)||1;
+  const X = i => p + i*(W-2*p)/(pts.length-1), Y = v => H-p - (v-mn)*(H-2*p)/rg;
+  g.strokeStyle='#3a4160'; g.setLineDash([6,6]); g.beginPath(); g.moveTo(p,Y(0)); g.lineTo(W-p,Y(0)); g.stroke(); g.setLineDash([]);
+  const last = pts[pts.length-1];
+  g.strokeStyle = last<0 ? '#ff5a6a' : '#3ddc84'; g.lineWidth = 3; g.beginPath();
+  pts.forEach((v,i)=> i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v))); g.stroke();
+  g.fillStyle='#8a92ad'; g.font='20px Inter';
+  g.fillText((last<0?'−':'+')+brl(Math.abs(last)), W-p-180, last<0? p+18 : H-p-6);
+}
+
+/* ---------- mass simulation ---------- */
+function mass(n){
+  if (spinning) return;
+  const c = cur; let spent=0, won=0, profitN=0, best=null; const curve=[0];
+  const byItem = new Map();
+  for (let k=0;k<n;k++){
+    const w = roll(c); spent += c.priceC; won += w.val; if (w.val > c.priceC) profitN++;
+    if (!best || w.val > best.val) best = w;
+    curve.push(won - spent);
+    const e = byItem.get(w.it) || {k:0, best:0}; e.k++; e.best = Math.max(e.best, w.val); byItem.set(w.it, e);
+  }
+  const net = won - spent;
+  const top = [...byItem.entries()].sort((a,b)=>b[1].best-a[1].best).slice(0,5);
+  const sh = document.getElementById('sheet');
+  sh.innerHTML = `
+    <h3>${n.toLocaleString('pt-BR')} aberturas de ${c.name}</h3>
+    <div class="small">Simulação instantânea com as mesmas chances (não entra nas suas estatísticas).</div>
+    <div class="bigrow">
+      <div class="big"><span>Você teria pago</span><b>${brl(spent)}</b></div>
+      <div class="big"><span>Valor das skins</span><b>${brl(won)}</b></div>
+      <div class="big"><span>Resultado</span><b class="${net<0?'neg':'pos'}">${net>=0?'+':'−'}${brl(Math.abs(net))}</b></div>
+      <div class="big"><span>Retorno</span><b>${pct(won/spent*100,1)}</b></div>
+    </div>
+    <div class="small">Aberturas que vieram com item mais caro que a caixa: <b style="color:var(--text)">${profitN.toLocaleString('pt-BR')} de ${n.toLocaleString('pt-BR')}</b> (${pct(profitN/n*100,1)})</div>
+    <div class="bar"><i style="width:${profitN/n*100}%"></i></div>
+    <h3 style="font-size:18px;margin-top:14px">Saldo ao longo das ${n.toLocaleString('pt-BR')}</h3>
+    <canvas id="mcurve" width="600" height="220"></canvas>
+    <h3 style="font-size:18px;margin-top:14px">Melhores itens que saíram</h3>
+    ${top.map(([it,e])=>`<div class="kv"><span>${esc(it.n)} × ${e.k}</span><b>${brl(e.best)}</b></div>`).join('')}
+    <div class="controls" style="--c:${c.accent}">
+      <button class="ghost" id="again">Simular de novo</button>
+      <button class="ghost" id="tenk">Simular 10.000</button>
+      <button class="open" id="close">Fechar</button>
+    </div>`;
+  document.getElementById('modal').classList.add('show');
+  drawCurve(document.getElementById('mcurve'), curve.length>1500 ? curve.filter((_,i)=>i%Math.ceil(curve.length/1500)===0).concat([curve[curve.length-1]]) : curve);
+  document.getElementById('again').onclick = () => mass(n);
+  document.getElementById('tenk').onclick = () => mass(10000);
+  document.getElementById('close').onclick = () => document.getElementById('modal').classList.remove('show');
+}
+document.getElementById('modal').addEventListener('click', e=>{ if (e.target.id==='modal') e.currentTarget.classList.remove('show'); });
+
+/* ---------- global ---------- */
+const sb = document.getElementById('sound'), fb = document.getElementById('fast');
+const syncBtns = () => { sb.classList.toggle('on', S.sound); sb.textContent = S.sound ? '🔊 Som' : '🔇 Som'; fb.classList.toggle('on', S.fast); };
+sb.onclick = () => { S.sound = !S.sound; save(); syncBtns(); };
+fb.onclick = () => { S.fast = !S.fast; save(); syncBtns(); };
+document.getElementById('home').onclick = () => { if (!spinning) home(); };
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && cur && !document.getElementById('modal').classList.contains('show')) { e.preventDefault(); spin(); }
+  if (e.key === 'Escape') document.getElementById('modal').classList.remove('show');
+});
+window.addEventListener('resize', () => { if (cur && !spinning) buildIdle(); });
+syncBtns(); home();
+</script>
+</body>
+</html>
